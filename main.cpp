@@ -3,6 +3,28 @@
 #include <iomanip>
 #include <iostream>
 
+void Fill(double* num, double* mult, int n, int i) {
+  if (i == n) {
+    return;
+  }
+  std::cin >> num[i];
+  mult[i + 1] = mult[i] * std::pow(num[i], 1.0 / n);
+  Fill(num, mult, n, i + 1);
+}
+
+void Loud(double* mult, int k, int q, int n) {
+  if (k == q) {
+    return;
+  }
+  int i;
+  int j;
+  std::cin >> i >> j;
+  double exp = 1.0 / (j - i + 1.0);
+  double ans = std::pow(mult[j + 1] / mult[i], n * exp);
+  std::cout << std::setprecision(12) << ans << std::endl;
+  Loud(mult, k + 1, q, n);
+}
+
 int main() {
   int n;
   int q;
@@ -10,19 +32,13 @@ int main() {
   double* num = new double[n];
   double* mult = new double[n + 1];
   mult[0] = 1.0;
-  for (int i = 0; i != n; ++i) {
-    std::cin >> num[i];
-    mult[i + 1] = mult[i] * std::pow(num[i], 1.0 / n);
-  }
+
+  Fill(num, mult, n, 0);
+
   std::cin >> q;
-  for (int k = 0; k != q; ++k) {
-    int i;
-    int j;
-    std::cin >> i >> j;
-    double exp = 1.0 / (j - i + 1.0);
-    double ans = std::pow(mult[j + 1] / mult[i], n * exp);
-    std::cout << std::setprecision(12) << ans << std::endl;
-  }
+
+  Loud(mult, 0, q, n);
+
   delete[] num;
   delete[] mult;
 }
