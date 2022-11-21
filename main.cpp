@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <iostream>
 
-void Fill(double* num, double* mult, int n, int i) {
+void Fill(double* num, double* mult, size_t n, size_t i) {
   if (i == n) {
     return;
   }
@@ -12,7 +12,7 @@ void Fill(double* num, double* mult, int n, int i) {
   Fill(num, mult, n, i + 1);
 }
 
-void Loud(double* mult, int k, int q, int n) {
+void Loud(double* mult, size_t k, size_t q, size_t n) {
   if (k == q) {
     return;
   }
@@ -26,8 +26,8 @@ void Loud(double* mult, int k, int q, int n) {
 }
 
 int main() {
-  int n;
-  int q;
+  size_t n;
+  size_t q;
   std::cin >> n;
   double* num = new double[n];
   double* mult = new double[n + 1];
