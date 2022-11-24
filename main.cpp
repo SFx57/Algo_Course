@@ -1,116 +1,196 @@
-//70462971
 #include <algorithm>
 #include <iostream>
 #include <string>
 
-int arr[200000];
-int arr_min[200000];
-int arr2[200000];
-int arr2_min[200000];
-int last_stud_num = 0;
-int last2 = 0;
+class Elem {
+ private:
+  Elem* next_;
+  int val_;
 
-void Enqueue() {
-  int n;
-  std::cin >> n;
-  std::cout << "ok" << std::endl;
-  arr[last_stud_num] = n;
-  arr_min[last_stud_num] =
-      (last_stud_num == 0 ? n : std::min(n, arr_min[last_stud_num - 1]));
-  ++last_stud_num;
-}
+ public:
+  Elem(int n) : next_(nullptr), val_(n) {}
 
-void Dequeue() {
-  if (last_stud_num == 0 && arr2[0] == 0) {
-    std::cout << "error" << std::endl;
-  } else {
-    if (arr2[0] == 0) {
-      while (arr[0] != 0) {
-        int num = arr[last_stud_num - 1];
-        arr[last_stud_num - 1] = 0;
-        arr_min[last_stud_num - 1] = 0;
-        int min = (arr2[0] == 0 ? num : std::min(num, arr2_min[last2 - 1]));
-        arr2[last2] = num;
-        arr2_min[last2] = min;
-        ++last2;
-        --last_stud_num;
-      }
-      last_stud_num = 0;
+  Elem* GetNext() { return this->next_; }
+
+  void SetNext(Elem* next) { this->next_ = next; }
+
+  int GetVal() { return this->val_; }
+
+  void SetVal(int val) { this->val_ = val; }
+};
+
+class Stack {
+ private:
+  int last_;
+  Elem* first_;
+
+ public:
+  Stack() : first_(nullptr) {}
+
+  ~Stack() {
+    while (!this->Empty()) {
+      this->Pop();
     }
-    std::cout << arr2[last2 - 1] << std::endl;
-    --last2;
-    arr2[last2] = 0;
-    arr2_min[last2] = 0;
   }
-}
 
-void Front() {
-  if (last_stud_num == 0 && arr2[0] == 0) {
-    std::cout << "error" << std::endl;
-  } else {
-    std::cout << (arr2[0] == 0 ? arr[0] : arr2[last2 - 1]) << std::endl;
-  }
-}
-
-void Min() {
-  if (last_stud_num == 0 && arr2[0] == 0) {
-    std::cout << "error" << std::endl;
-  } else {
-    int min;
-    if (last_stud_num == 0) {
-      min = arr2_min[last2 - 1];
-    } else if (arr2[0] == 0) {
-      min = arr_min[last_stud_num - 1];
+  void Push(int val) {
+    if (first_ == nullptr) {
+      first_ = new Elem(val);
+      last_ = val;
     } else {
-      min = std::min(arr2_min[last2 - 1], arr_min[last_stud_num - 1]);
+      Elem* el = first_;
+      first_ = new Elem(val);
+      first_->SetNext(el);
     }
-    std::cout << min << std::endl;
   }
+
+  int GetLast() {
+    if (this->Empty()) {
+      return -1;
+    }
+    return last_;
+  }
+
+  int GetVal() { return first_->GetVal(); }
+
+  bool Empty() { return first_ == nullptr; }
+
+  int Pop() {
+    if (this->Empty()) {
+      return -1;
+    }
+    Elem* el = first_;
+    first_ = first_->GetNext();
+    int val = el->GetVal();
+    delete el;
+    return val;
+  }
+};
+
+class Queue {
+ private:
+  int sz_ = 0;
+  Stack* left_;
+  Stack* right_;
+  Stack* left_min_;
+  Stack* right_min_;
+
+ public:
+  Queue() {
+    left_ = new Stack();
+    right_ = new Stack();
+    left_min_ = new Stack();
+    right_min_ = new Stack();
+  }
+  ~Queue() {
+    delete left_;
+    delete right_;
+    delete left_min_;
+    delete right_min_;
+  }
+
+  void Push(int val) {
+    left_min_->Push(left_->Empty() ? val : std::min(val, left_min_->GetVal()));
+    left_->Push(val);
+    ++sz_;
+  }
+
+  int Pop() {
+    if (left_->Empty() && right_->Empty()) {
+      return -1;
+    }
+    if (right_->Empty()) {
+      while (!left_->Empty()) {
+        int num = left_->Pop();
+        left_min_->Pop();
+        int min = (right_->Empty() ? num : std::min(num, right_min_->GetVal()));
+        right_->Push(num);
+        right_min_->Push(min);
+      }
+    }
+    right_min_->Pop();
+    --sz_;
+    return right_->Pop();
+  }
+
+  int Front() {
+    if (left_->Empty() && right_->Empty()) {
+      return -1;
+    }
+    return (right_->Empty() ? left_->GetLast() : right_->GetVal());
+  }
+
+  int Min() {
+    if (left_->Empty() && right_->Empty()) {
+      return -1;
+    }
+    int min;
+    if (left_->Empty()) {
+      min = right_min_->GetVal();
+    } else if (right_->Empty()) {
+      min = left_min_->GetVal();
+    } else {
+      min = std::min(left_min_->GetVal(), right_min_->GetVal());
+    }
+    return min;
+  }
+
+  int Size() { return sz_; }
+
+  void Clear() {
+    delete left_;
+    delete right_;
+    delete left_min_;
+    delete right_min_;
+    left_ = new Stack();
+    right_ = new Stack();
+    left_min_ = new Stack();
+    right_min_ = new Stack();
+    sz_ = 0;
+  }
+};
+
+void Out(int val) {
+  if (val == -1) {
+    std::cout << "error\n";
+    return;
+  }
+  std::cout << val << "\n";
 }
 
-void Size() { std::cout << last_stud_num + last2 << std::endl; }
-
-void Clear() {
-  std::cout << "ok" << std::endl;
-  for (int i = 0; i != last_stud_num; ++i) {
-    arr[i] = 0;
-    arr_min[i] = 0;
-  }
-  for (int i = 0; i != last2; ++i) {
-    arr2[i] = 0;
-    arr2_min[i] = 0;
-  }
-  last_stud_num = 0;
-  last2 = 0;
-}
-
-void Define(std::string cmd) {
+void Define(std::string cmd, Queue* q) {
   if (cmd == "enqueue") {
-    Enqueue();
+    int x;
+    std::cin >> x;
+    q->Push(x);
+    std::cout << "ok\n";
   }
   if (cmd == "dequeue") {
-    Dequeue();
+    Out(q->Pop());
   }
   if (cmd == "front") {
-    Front();
+    Out(q->Front());
   }
   if (cmd == "clear") {
-    Clear();
+    q->Clear();
+    std::cout << "ok\n";
   }
   if (cmd == "min") {
-    Min();
+    Out(q->Min());
   }
   if (cmd == "size") {
-    Size();
+    std::cout << q->Size() << "\n";
   }
 }
 
 int main() {
-  int m;
+  size_t m;
+  Queue* q = new Queue();
   std::cin >> m;
-  for (int i = 0; i != m; ++i) {
+  for (size_t i = 0; i != m; ++i) {
     std::string cmd;
     std::cin >> cmd;
-    Define(cmd);
+    Define(cmd, q);
   }
+  delete q;
 }
